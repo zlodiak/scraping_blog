@@ -1,4 +1,5 @@
 from pycoder.items import PycoderItem
+from scrapy.loader import ItemLoader
 
 import scrapy
 from urllib.parse import urljoin
@@ -26,10 +27,10 @@ class PycoderSpider(scrapy.Spider):
         yield response.follow(next_page_url, callback=self.parse)
 
     def parse_post(self, response):
-        item = PycoderItem()
+        loader = ItemLoader(item=PycoderItem(), selector=response)
 
-        item['title'] = response.css('div.col-sm-9 h2::text').get()
-        item['body'] = response.css('div.block-paragraph p::text').get()
-        item['date'] = response.css('div.col-sm-9 p::text').get()
+        loader.add_css('title', 'div.col-sm-9 h2::text')
+        loader.add_css('body', 'div.block-paragraph p::text')
+        loader.add_css('date', 'div.col-sm-9 p::text')
 
-        yield item
+        yield loader.load_item()
